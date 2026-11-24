@@ -49,6 +49,12 @@ No Docker, network access, credentials, or manual steps are required; tests run 
 - **After controller fix and mock fixture alignment (Green):**
   - `Tests run: 35, Failures: 0, Errors: 0, Skipped: 0` (`BUILD SUCCESS`)
 - *(Note: To reproduce the "Before" failures locally, temporarily restore `OwnerRestControllerV1.java` to commit `4cd8e1b0cd42578e882247d8801f6be5d402f118` and run `OwnerNestedResourceOwnershipTests`.)*
+```bash
+git checkout 4cd8e1b0cd42578e882247d8801f6be5d402f118 -- src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java
+./mvnw test -Dtest=OwnerNestedResourceOwnershipTests
+git checkout HEAD -- src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java
+```
+
 
 ## Confidence Limits
 - **What the evidence shows:**
