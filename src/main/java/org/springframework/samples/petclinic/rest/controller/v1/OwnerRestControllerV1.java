@@ -160,7 +160,7 @@ public class OwnerRestControllerV1 implements OwnersApi {
     public ResponseEntity<Void> updateOwnersPet(Integer ownerId, Integer petId, PetFieldsDto petFieldsDto) {
         Owner currentOwner = this.clinicService.findOwnerById(ownerId);
         if (currentOwner != null) {
-            Pet currentPet = this.clinicService.findPetById(petId);
+            Pet currentPet = currentOwner.getPet(petId);
             if (currentPet != null) {
                 currentPet.setBirthDate(petFieldsDto.getBirthDate());
                 currentPet.setName(petFieldsDto.getName());
@@ -175,16 +175,21 @@ public class OwnerRestControllerV1 implements OwnersApi {
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
     public ResponseEntity<VisitDto> addVisitToOwner(Integer ownerId, Integer petId, VisitFieldsDto visitFieldsDto) {
-        HttpHeaders headers = new HttpHeaders();
-        Visit visit = visitMapper.toVisit(visitFieldsDto);
-        Pet pet = new Pet();
-        pet.setId(petId);
-        visit.setPet(pet);
-        this.clinicService.saveVisit(visit);
-        VisitDto visitDto = visitMapper.toVisitDto(visit);
-        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/visits/{id}")
-            .buildAndExpand(visit.getId()).toUri());
-        return new ResponseEntity<>(visitDto, headers, HttpStatus.CREATED);
+        Owner owner = this.clinicService.findOwnerById(ownerId);
+        if (owner != null) {
+            Pet pet = owner.getPet(petId);
+            if (pet != null) {
+                HttpHeaders headers = new HttpHeaders();
+                Visit visit = visitMapper.toVisit(visitFieldsDto);
+                visit.setPet(pet);
+                this.clinicService.saveVisit(visit);
+                VisitDto visitDto = visitMapper.toVisitDto(visit);
+                headers.setLocation(UriComponentsBuilder.newInstance().path("/api/visits/{id}")
+                    .buildAndExpand(visit.getId()).toUri());
+                return new ResponseEntity<>(visitDto, headers, HttpStatus.CREATED);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 

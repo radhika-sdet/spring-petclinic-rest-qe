@@ -516,9 +516,10 @@ class OwnerRestControllerV1Tests {
             .andExpect(jsonPath("$.timestamp").exists());
     }
 
-    @Test
+   @Test
     @WithMockUser(roles = "OWNER_ADMIN")
     void testCreateVisitSuccess() throws Exception {
+        given(this.clinicService.findOwnerById(1)).willReturn(ownerMapper.toOwner(owners.get(0)));
         VisitDto newVisit = visits.get(0);
         newVisit.setId(999);
         ObjectMapper mapper = new ObjectMapper();
@@ -528,6 +529,7 @@ class OwnerRestControllerV1Tests {
                 .content(newVisitAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated());
     }
+
 
     @Test
     @WithMockUser(roles = "OWNER_ADMIN")
@@ -564,14 +566,13 @@ class OwnerRestControllerV1Tests {
     }
 
 
-    @Test
+        @Test
     @WithMockUser(roles = "OWNER_ADMIN")
     void testUpdateOwnersPetSuccess() throws Exception {
         int ownerId = owners.get(0).getId();
-        int petId = pets.get(0).getId();
+        PetDto updatedPetDto = owners.get(0).getPets().get(0);
+        int petId = updatedPetDto.getId();
         given(this.clinicService.findOwnerById(ownerId)).willReturn(ownerMapper.toOwner(owners.get(0)));
-        given(this.clinicService.findPetById(petId)).willReturn(petMapper.toPet(pets.get(0)));
-        PetDto updatedPetDto = pets.get(0);
         updatedPetDto.setName("Rex");
         updatedPetDto.setBirthDate(LocalDate.of(2020, 1, 15));
         ObjectMapper mapper =  JsonMapper.builder()
